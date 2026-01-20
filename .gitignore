@@ -26,3 +26,9 @@ maps
 templates
 box
 test4
+
+# Block 5 executables
+inheritance
+override
+virtual_destructor
+test5
