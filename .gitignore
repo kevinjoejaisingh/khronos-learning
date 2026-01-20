@@ -11,3 +11,18 @@ dog
 dog_multi
 test1
 test2
+
+# Block 3-4 executables
+pointers
+references
+pass_by
+heap
+heap_dog
+smart
+test3
+vectors
+sensor_vector
+maps
+templates
+box
+test4
