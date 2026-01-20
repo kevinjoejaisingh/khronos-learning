@@ -1,0 +1,13 @@
+# Compiled executables
+*.o
+a.out
+hello
+variables
+math
+loops
+functions
+order_test
+dog
+dog_multi
+test1
+test2
