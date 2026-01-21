@@ -32,3 +32,7 @@ inheritance
 override
 virtual_destructor
 test5
+
+# CMake build directories
+cmake-basics/build/
+cmake-test/build/
