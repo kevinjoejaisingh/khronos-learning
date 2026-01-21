@@ -1,0 +1,39 @@
+-- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found rclcpp: 28.1.13 (/opt/ros/jazzy/share/rclcpp/cmake)
+-- Found rosidl_generator_c: 4.6.6 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+-- Found rosidl_generator_cpp: 4.6.6 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rmw_implementation_cmake: 7.3.2 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+-- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+-- Using RMW implementation 'rmw_fastrtps_cpp' as default
+-- Found std_msgs: 5.3.6 (/opt/ros/jazzy/share/std_msgs/cmake)
+-- Configuring done (0.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/kevin/khronos-learning/ros2_ws/build/my_first_node
+[ 25%] [32mBuilding CXX object CMakeFiles/simple_subscriber.dir/src/simple_subscriber.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/simple_publisher.dir/src/simple_publisher.cpp.o[0m
+[ 75%] [32m[1mLinking CXX executable simple_publisher[0m
+[ 75%] Built target simple_publisher
+[100%] [32m[1mLinking CXX executable simple_subscriber[0m
+[100%] Built target simple_subscriber
+-- Install configuration: ""
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher
+-- Set non-toolchain portion of runtime path of "/home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher" to ""
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_subscriber
+-- Set non-toolchain portion of runtime path of "/home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_subscriber" to ""
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/package_run_dependencies/my_first_node
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/parent_prefix_path/my_first_node
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.bash
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.zsh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.dsv
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/packages/my_first_node
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig.cmake
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig-version.cmake
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.xml

@@ -1,0 +1,2 @@
+Invoking command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/kevin/khronos-learning/ros2_ws/build/my_first_node -- -j20 -l20
+Invoked command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/kevin/khronos-learning/ros2_ws/build/my_first_node -- -j20 -l20

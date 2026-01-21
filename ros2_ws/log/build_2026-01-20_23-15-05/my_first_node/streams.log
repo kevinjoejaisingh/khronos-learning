@@ -1,0 +1,29 @@
+[0.007s] Invoking command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/kevin/khronos-learning/ros2_ws/build/my_first_node -- -j20 -l20
+[0.074s] [ 25%] [32mBuilding CXX object CMakeFiles/simple_publisher.dir/src/simple_publisher.cpp.o[0m
+[0.074s] [ 75%] Built target simple_subscriber
+[2.389s] [100%] [32m[1mLinking CXX executable simple_publisher[0m
+[2.487s] [100%] Built target simple_publisher
+[2.499s] Invoked command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/kevin/khronos-learning/ros2_ws/build/my_first_node -- -j20 -l20
+[2.509s] Invoking command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/kevin/khronos-learning/ros2_ws/build/my_first_node
+[2.523s] -- Install configuration: ""
+[2.523s] -- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher
+[2.524s] -- Set non-toolchain portion of runtime path of "/home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher" to ""
+[2.524s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_subscriber
+[2.524s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/launch
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/launch/pubsub.launch.py
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/package_run_dependencies/my_first_node
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/parent_prefix_path/my_first_node
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.sh
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.dsv
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.sh
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.dsv
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.bash
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.sh
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.zsh
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.dsv
+[2.525s] -- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.dsv
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/packages/my_first_node
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig.cmake
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig-version.cmake
+[2.525s] -- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.xml
+[2.527s] Invoked command in '/home/kevin/khronos-learning/ros2_ws/build/my_first_node' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/kevin/khronos-learning/ros2_ws/build/my_first_node

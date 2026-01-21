@@ -382,7 +382,567 @@ world
         ├── camera
         ├── imu
         └── lidar
+---
+
+## ROS2 Cheat Sheet
+
+### Core Concepts
+```
+┌──────────┐     /topic      ┌──────────┐
+│  Node A  │ ───────────────►│  Node B  │
+│  (pub)   │    messages     │  (sub)   │
+└──────────┘                 └──────────┘
+```
+
+| Concept | Description |
+|---------|-------------|
+| **Node** | Independent program that does one thing |
+| **Topic** | Named channel for continuous data (like a radio frequency) |
+| **Message** | Structured data sent on topics |
+| **Publisher** | Sends data to a topic |
+| **Subscriber** | Receives data from a topic |
+| **Service** | Request/response (like a function call) |
+| **Parameter** | Runtime configuration value |
+| **Bag** | Recorded topic data for playback |
+| **tf2** | Coordinate frame transform system |
+
+### Command Line Tools
+```bash
+# Nodes
+ros2 node list                    # List running nodes
+ros2 node info /node_name         # Info about a node
+
+# Topics
+ros2 topic list                   # List all topics
+ros2 topic echo /topic_name       # Listen to a topic
+ros2 topic info /topic_name       # Show topic type and pub/sub count
+ros2 topic hz /topic_name         # Show publish rate
+
+# Messages
+ros2 interface show std_msgs/msg/String    # Show message structure
+ros2 interface show sensor_msgs/msg/Imu    # Show IMU message
+
+# Services
+ros2 service list                 # List all services
+ros2 service call /srv_name type "{arg: value}"  # Call a service
+
+# Parameters
+ros2 param list /node_name        # List node's parameters
+ros2 param get /node_name param   # Get parameter value
+ros2 param set /node_name param value  # Set parameter
+
+# Transforms (tf2)
+ros2 run tf2_ros tf2_echo frame1 frame2   # Show transform between frames
+ros2 run tf2_ros static_transform_publisher --x 1.0 --y 0 --z 0.5 --frame-id parent --child-frame-id child
+
+# Bags
+ros2 bag record /topic1 /topic2 -o bagname   # Record topics
+ros2 bag play bagname                         # Playback recording
+ros2 bag info bagname                         # Show bag info
+
+# Running nodes
+ros2 run package_name executable_name         # Run a node
+ros2 launch package_name launch_file.py       # Run launch file
+```
+
+### Writing a Publisher Node
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+
+class MyPublisher : public rclcpp::Node {
+public:
+    MyPublisher() : Node("my_publisher") {
+        // Create publisher on topic "my_topic" with queue size 10
+        publisher_ = this->create_publisher<std_msgs::msg::String>("my_topic", 10);
+        
+        // Create timer that calls callback every 500ms
+        timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(500),
+            std::bind(&MyPublisher::timer_callback, this)
+        );
+    }
+
+private:
+    void timer_callback() {
+        auto message = std_msgs::msg::String();
+        message.data = "Hello World";
+        publisher_->publish(message);
+        RCLCPP_INFO(this->get_logger(), "Published: '%s'", message.data.c_str());
+    }
+
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
+};
+
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<MyPublisher>());
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+### Writing a Subscriber Node
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+
+class MySubscriber : public rclcpp::Node {
+public:
+    MySubscriber() : Node("my_subscriber") {
+        subscription_ = this->create_subscription<std_msgs::msg::String>(
+            "my_topic", 10,
+            std::bind(&MySubscriber::topic_callback, this, std::placeholders::_1)
+        );
+    }
+
+private:
+    void topic_callback(const std_msgs::msg::String::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "Heard: '%s'", msg->data.c_str());
+    }
+
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+};
+
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<MySubscriber>());
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+### Parameters
+```cpp
+// In constructor
+this->declare_parameter("my_param", 100);           // Declare with default
+int value = this->get_parameter("my_param").as_int();  // Get value
+
+// Run with custom parameter
+// ros2 run my_pkg my_node --ros-args -p my_param:=200
+```
+
+### CMakeLists.txt for ROS2
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_package)
+
+# Find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+
+# Create executable
+add_executable(my_node src/my_node.cpp)
+ament_target_dependencies(my_node rclcpp std_msgs)
+
+# Install executable
+install(TARGETS my_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+ament_package()
+```
+
+### package.xml
+```xml
+<?xml version="1.0"?>
+<package format="3">
+  <name>my_package</name>
+  <version>0.0.1</version>
+  <description>My ROS2 package</description>
+  <maintainer email="you@email.com">Your Name</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+### Launch File (Python)
+```python
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='my_package',
+            executable='my_publisher',
+            name='publisher',
+            parameters=[{'my_param': 100}]
+        ),
+        Node(
+            package='my_package',
+            executable='my_subscriber',
+            name='subscriber'
+        )
+    ])
+```
+
+### Build and Run
+```bash
+# Create workspace
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+# Create package
+ros2 pkg create --build-type ament_cmake my_package
+
+# Build
+cd ~/ros2_ws
+colcon build
+
+# Source (do this in every new terminal)
+source install/setup.bash
+
+# Run node
+ros2 run my_package my_node
+
+# Run launch file
+ros2 launch my_package my_launch.py
+```
+
+### tf2 Transforms
+```
+TF Tree Example:
+world
+  └── drone
+        ├── camera
+        ├── imu
+        └── lidar
 
 Each frame has ONE parent.
-Chain transforms to go between frames.
+tf2 computes any transform by walking the tree.
 ```
+
+| Direction | Operation |
+|-----------|-----------|
+| Parent → Child | Use transform as-is |
+| Child → Parent | Reverse the transform |
+```bash
+# Publish static transform
+ros2 run tf2_ros static_transform_publisher \
+  --x 1.0 --y 0 --z 0.5 \
+  --roll 0 --pitch 0 --yaw 0 \
+  --frame-id world --child-frame-id drone
+
+# Echo transform
+ros2 run tf2_ros tf2_echo world drone
+```
+
+### Common Message Types
+
+| Package | Message | Use |
+|---------|---------|-----|
+| `std_msgs` | `String`, `Int32`, `Float64` | Simple data |
+| `sensor_msgs` | `Image` | Camera images |
+| `sensor_msgs` | `PointCloud2` | 3D point clouds |
+| `sensor_msgs` | `Imu` | Accelerometer/gyroscope |
+| `geometry_msgs` | `Pose` | Position + orientation |
+| `geometry_msgs` | `Transform` | Frame transform |
+| `geometry_msgs` | `Twist` | Linear + angular velocity |
+
+### Topics vs Services
+
+| Topics | Services |
+|--------|----------|
+| Continuous stream | One-time request/response |
+| Many subscribers | One client at a time |
+| Publisher doesn't wait | Client waits for response |
+| Sensor data, status | Commands, save/load, queries |
+Each frame has ONE parent.
+Chain transforms to go between frames.
+
+---
+
+## ROS2 Cheat Sheet
+
+### Core Concepts
+```
+┌──────────┐     /topic      ┌──────────┐
+│  Node A  │ ───────────────►│  Node B  │
+│  (pub)   │    messages     │  (sub)   │
+└──────────┘                 └──────────┘
+```
+
+| Concept | Description |
+|---------|-------------|
+| **Node** | Independent program that does one thing |
+| **Topic** | Named channel for continuous data (like a radio frequency) |
+| **Message** | Structured data sent on topics |
+| **Publisher** | Sends data to a topic |
+| **Subscriber** | Receives data from a topic |
+| **Service** | Request/response (like a function call) |
+| **Parameter** | Runtime configuration value |
+| **Bag** | Recorded topic data for playback |
+| **tf2** | Coordinate frame transform system |
+
+### Command Line Tools
+```bash
+# Nodes
+ros2 node list                    # List running nodes
+ros2 node info /node_name         # Info about a node
+
+# Topics
+ros2 topic list                   # List all topics
+ros2 topic echo /topic_name       # Listen to a topic
+ros2 topic info /topic_name       # Show topic type and pub/sub count
+ros2 topic hz /topic_name         # Show publish rate
+
+# Messages
+ros2 interface show std_msgs/msg/String    # Show message structure
+ros2 interface show sensor_msgs/msg/Imu    # Show IMU message
+
+# Services
+ros2 service list                 # List all services
+ros2 service call /srv_name type "{arg: value}"  # Call a service
+
+# Parameters
+ros2 param list /node_name        # List node's parameters
+ros2 param get /node_name param   # Get parameter value
+ros2 param set /node_name param value  # Set parameter
+
+# Transforms (tf2)
+ros2 run tf2_ros tf2_echo frame1 frame2   # Show transform between frames
+ros2 run tf2_ros static_transform_publisher --x 1.0 --y 0 --z 0.5 --frame-id parent --child-frame-id child
+
+# Bags
+ros2 bag record /topic1 /topic2 -o bagname   # Record topics
+ros2 bag play bagname                         # Playback recording
+ros2 bag info bagname                         # Show bag info
+
+# Running nodes
+ros2 run package_name executable_name         # Run a node
+ros2 launch package_name launch_file.py       # Run launch file
+```
+
+### Writing a Publisher Node
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+
+class MyPublisher : public rclcpp::Node {
+public:
+    MyPublisher() : Node("my_publisher") {
+        // Create publisher on topic "my_topic" with queue size 10
+        publisher_ = this->create_publisher<std_msgs::msg::String>("my_topic", 10);
+        
+        // Create timer that calls callback every 500ms
+        timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(500),
+            std::bind(&MyPublisher::timer_callback, this)
+        );
+    }
+
+private:
+    void timer_callback() {
+        auto message = std_msgs::msg::String();
+        message.data = "Hello World";
+        publisher_->publish(message);
+        RCLCPP_INFO(this->get_logger(), "Published: '%s'", message.data.c_str());
+    }
+
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
+};
+
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<MyPublisher>());
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+### Writing a Subscriber Node
+```cpp
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
+
+class MySubscriber : public rclcpp::Node {
+public:
+    MySubscriber() : Node("my_subscriber") {
+        subscription_ = this->create_subscription<std_msgs::msg::String>(
+            "my_topic", 10,
+            std::bind(&MySubscriber::topic_callback, this, std::placeholders::_1)
+        );
+    }
+
+private:
+    void topic_callback(const std_msgs::msg::String::SharedPtr msg) {
+        RCLCPP_INFO(this->get_logger(), "Heard: '%s'", msg->data.c_str());
+    }
+
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+};
+
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<MySubscriber>());
+    rclcpp::shutdown();
+    return 0;
+}
+```
+
+### Parameters
+```cpp
+// In constructor
+this->declare_parameter("my_param", 100);           // Declare with default
+int value = this->get_parameter("my_param").as_int();  // Get value
+
+// Run with custom parameter
+// ros2 run my_pkg my_node --ros-args -p my_param:=200
+```
+
+### CMakeLists.txt for ROS2
+```cmake
+cmake_minimum_required(VERSION 3.8)
+project(my_package)
+
+# Find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+
+# Create executable
+add_executable(my_node src/my_node.cpp)
+ament_target_dependencies(my_node rclcpp std_msgs)
+
+# Install executable
+install(TARGETS my_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
+)
+
+ament_package()
+```
+
+### package.xml
+```xml
+<?xml version="1.0"?>
+<package format="3">
+  <name>my_package</name>
+  <version>0.0.1</version>
+  <description>My ROS2 package</description>
+  <maintainer email="you@email.com">Your Name</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
+```
+
+### Launch File (Python)
+```python
+from launch import LaunchDescription
+from launch_ros.actions import Node
+
+def generate_launch_description():
+    return LaunchDescription([
+        Node(
+            package='my_package',
+            executable='my_publisher',
+            name='publisher',
+            parameters=[{'my_param': 100}]
+        ),
+        Node(
+            package='my_package',
+            executable='my_subscriber',
+            name='subscriber'
+        )
+    ])
+```
+
+### Build and Run
+```bash
+# Create workspace
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+# Create package
+ros2 pkg create --build-type ament_cmake my_package
+
+# Build
+cd ~/ros2_ws
+colcon build
+
+# Source (do this in every new terminal)
+source install/setup.bash
+
+# Run node
+ros2 run my_package my_node
+
+# Run launch file
+ros2 launch my_package my_launch.py
+```
+
+### tf2 Transforms
+```
+TF Tree Example:
+world
+  └── drone
+        ├── camera
+        ├── imu
+        └── lidar
+
+Each frame has ONE parent.
+tf2 computes any transform by walking the tree.
+```
+
+| Direction | Operation |
+|-----------|-----------|
+| Parent → Child | Use transform as-is |
+| Child → Parent | Reverse the transform |
+```bash
+# Publish static transform
+ros2 run tf2_ros static_transform_publisher \
+  --x 1.0 --y 0 --z 0.5 \
+  --roll 0 --pitch 0 --yaw 0 \
+  --frame-id world --child-frame-id drone
+
+# Echo transform
+ros2 run tf2_ros tf2_echo world drone
+```
+
+### Common Message Types
+
+| Package | Message | Use |
+|---------|---------|-----|
+| `std_msgs` | `String`, `Int32`, `Float64` | Simple data |
+| `sensor_msgs` | `Image` | Camera images |
+| `sensor_msgs` | `PointCloud2` | 3D point clouds |
+| `sensor_msgs` | `Imu` | Accelerometer/gyroscope |
+| `geometry_msgs` | `Pose` | Position + orientation |
+| `geometry_msgs` | `Transform` | Frame transform |
+| `geometry_msgs` | `Twist` | Linear + angular velocity |
+
+### Topics vs Services
+
+| Topics | Services |
+|--------|----------|
+| Continuous stream | One-time request/response |
+| Many subscribers | One client at a time |
+| Publisher doesn't wait | Client waits for response |
+| Sensor data, status | Commands, save/load, queries |
+'''

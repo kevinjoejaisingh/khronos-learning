@@ -1,0 +1,25 @@
+[ 25%] [32mBuilding CXX object CMakeFiles/simple_publisher.dir/src/simple_publisher.cpp.o[0m
+[ 75%] Built target simple_subscriber
+[100%] [32m[1mLinking CXX executable simple_publisher[0m
+[100%] Built target simple_publisher
+-- Install configuration: ""
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher
+-- Set non-toolchain portion of runtime path of "/home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_publisher" to ""
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/lib/my_first_node/simple_subscriber
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/launch
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/launch/pubsub.launch.py
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/package_run_dependencies/my_first_node
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/parent_prefix_path/my_first_node
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/environment/path.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.bash
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.sh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.zsh
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/local_setup.dsv
+-- Installing: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.dsv
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/ament_index/resource_index/packages/my_first_node
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig.cmake
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/cmake/my_first_nodeConfig-version.cmake
+-- Up-to-date: /home/kevin/khronos-learning/ros2_ws/install/my_first_node/share/my_first_node/package.xml

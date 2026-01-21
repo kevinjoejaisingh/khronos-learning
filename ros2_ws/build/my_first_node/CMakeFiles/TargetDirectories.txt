@@ -1,0 +1,11 @@
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/uninstall.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/my_first_node_uninstall.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/simple_publisher.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/simple_subscriber.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/test.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/edit_cache.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/rebuild_cache.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/list_install_components.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/install.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/install/local.dir
+/home/kevin/khronos-learning/ros2_ws/build/my_first_node/CMakeFiles/install/strip.dir
