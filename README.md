@@ -17,9 +17,9 @@ My path to understanding C++, ROS2, and the MIT SPARK stack for drone SLAM.
 | 7 | Kimera-VIO | ✅ |
 | 8 | Kimera-Semantics | ✅ |
 | 9 | Hydra | ✅ |
-| 10 | Khronos | 🔜 |
+| 10 | Khronos | ✅ |
 
-**Completed:** ~23 hours | **Remaining:** ~2 hours
+**Theory Complete!** Waiting for D455 hardware to begin integration.
 
 ---
 
@@ -1318,37 +1318,323 @@ Time 15s:  Drone finds a door, enters new room
 
 ---
 
-# Phase 10: Khronos (Coming Soon)
+# Phase 10: Khronos
 
-## Preview
+## Summary
+Khronos adds the **fourth dimension: time**. It answers: **"What changed?"** by building a spatio-temporal representation that tracks how the environment evolves.
 
-Khronos adds the **temporal** dimension: **"What changed?"**
+## The Problem: Static World Assumption
 
-All the previous systems assume a static world. Khronos handles:
-- Objects that move
-- Things that appear or disappear
-- Changes over time
+All previous systems assume the world is **static** — nothing moves.
+
+But real environments change:
+- Someone moves a chair
+- A door opens/closes
+- A person walks through
+- Objects appear or disappear
 
 ```
-┌─────────────────────────────────────────────┐
-│              SPATIO-TEMPORAL SLAM           │
-│                                             │
-│  Time 1: Chair at [2, 3]                    │
-│  Time 2: Chair at [2, 3]  ✓ same            │
-│  Time 3: Chair at [4, 5]  ⚠ MOVED!         │
-│  Time 4: Chair GONE       ⚠ REMOVED!       │
-└─────────────────────────────────────────────┘
+Traditional SLAM:
+
+Time 1:  Chair at [2, 3]     ✓ Map says chair here
+Time 2:  Chair at [5, 1]     ✗ CONFLICT! Map says [2,3] but I see [5,1]
+         
+         System gets confused — "Is my position wrong? Or did the chair move?"
 ```
 
-This is the final piece — understanding not just *what* the world looks like, but *how* it changes.
+**Khronos solves this by tracking changes over time.**
+
+## The Key Insight: Spatio-Temporal
+
+**Spatial** = where things are (x, y, z)
+**Temporal** = when things are there (t)
+
+Khronos builds a **4D representation**: (x, y, z, t)
+
+```
+Instead of:  "There is a chair at [2, 3, 0]"
+
+Khronos says: "There is a chair at [2, 3, 0] from time T1 to T2"
+              "There is a chair at [5, 1, 0] from time T2 to now"
+```
+
+## How Khronos Detects Changes
+
+Khronos compares what it **expects to see** vs what it **actually sees**:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    CHANGE DETECTION                      │
+│                                                          │
+│   Expected (from previous map):    Observed (now):       │
+│   ┌──────────────────────┐        ┌──────────────────┐  │
+│   │        wall          │        │        wall      │  │
+│   │                      │        │                  │  │
+│   │   ▄▄▄▄               │        │          ▄▄▄▄   │  │
+│   │   chair              │        │          chair  │  │
+│   │                      │        │                  │  │
+│   └──────────────────────┘        └──────────────────┘  │
+│                                                          │
+│   DIFFERENCE: Chair moved from left to right!            │
+└─────────────────────────────────────────────────────────┘
+```
+
+The process:
+1. **Predict** — Based on current map, what should I see from this pose?
+2. **Observe** — What do I actually see?
+3. **Compare** — What's different?
+4. **Update** — Record the change with a timestamp
+
+## Types of Changes
+
+| Change Type | Example | How Khronos Records It |
+|-------------|---------|------------------------|
+| **Object moved** | Chair shifted 2 meters | Old position ends at T1, new position starts at T1 |
+| **Object appeared** | New box on table | Object starts existing at T1 |
+| **Object disappeared** | Book removed from shelf | Object stops existing at T1 |
+| **Dynamic object** | Person walking | Tracked as transient, not added to persistent map |
+
+## Object Classification
+
+Not everything that moves should be tracked the same way:
+
+| Category | Examples | How Khronos Handles |
+|----------|----------|---------------------|
+| **Static** | Walls, floor, ceiling | Never changes, part of base map (structurally cannot move) |
+| **Semi-static** | Furniture, boxes | Tracked with time intervals (can move but usually doesn't) |
+| **Dynamic** | People, pets, robots | Filtered out, not added to persistent map |
+
+```
+Scene:
+┌────────────────────────────────────────┐
+│   wall (STATIC)                        │
+│                                        │
+│   ▄▄▄▄ chair (SEMI-STATIC)             │
+│                                        │
+│      🚶 person (DYNAMIC)               │
+│                                        │
+│   ════ table (SEMI-STATIC)             │
+└────────────────────────────────────────┘
+
+Khronos decision:
+  • Wall → permanent map (structurally cannot move)
+  • Chair → tracked with timestamps (could move)
+  • Person → ignored (transient)
+  • Table → tracked with timestamps (could move)
+```
+
+**Key distinction:** A couch that hasn't moved in 3 months is still **semi-static** (it *could* move). A wall is **static** (it *cannot* move).
+
+### How Does Khronos Know Something is Dynamic?
+
+| Cue | How it works |
+|-----|--------------|
+| **Semantic label** | "person" class → always dynamic |
+| **Motion detection** | Object moving right now → dynamic |
+| **Persistence** | Seen briefly then gone → probably dynamic |
+| **Size/shape** | Human-shaped blob → probably dynamic |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                       KHRONOS                            │
+│                                                          │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐  │
+│  │  Change     │    │  Temporal   │    │  4D Scene   │  │
+│  │  Detection  │───►│  Tracking   │───►│  Graph      │  │
+│  └─────────────┘    └─────────────┘    └─────────────┘  │
+│         ▲                                                │
+└─────────┼───────────────────────────────────────────────┘
+          │
+┌─────────┴───────────────────────────────────────────────┐
+│                        HYDRA                             │
+│              (3D Scene Graph - current state)            │
+└─────────────────────────────────────────────────────────┘
+          ▲
+┌─────────┴───────────────────────────────────────────────┐
+│                   KIMERA-SEMANTICS                       │
+│                  (Labeled 3D Mesh)                       │
+└─────────────────────────────────────────────────────────┘
+          ▲
+┌─────────┴───────────────────────────────────────────────┐
+│                      KIMERA-VIO                          │
+│                       (Poses)                            │
+└─────────────────────────────────────────────────────────┘
+          ▲
+┌─────────┴───────────────────────────────────────────────┐
+│                    D455 CAMERA                           │
+│               (RGB + Depth + IMU)                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+## The 4D Scene Graph
+
+Hydra gives you a **3D scene graph** (spatial).
+Khronos extends it to a **4D scene graph** (spatio-temporal).
+
+```
+HYDRA (3D):                         KHRONOS (4D):
+
+Building                            Building
+  └── Room_1                          └── Room_1
+        ├── Chair_1 [2,3,0]                 ├── Chair_1 [2,3,0]  (T0 → T5)
+        └── Table_1 [4,2,0]                 ├── Chair_1 [5,1,0]  (T5 → now)  ← MOVED
+                                            └── Table_1 [4,2,0]  (T0 → now)
+```
+
+Each object now has a **time interval** — when it existed at that location.
+
+## Querying the Past
+
+One powerful feature: **"What did the room look like at time T?"**
+
+```
+Query: "Show me Room_1 at T3"
+
+Response:
+┌────────────────────────────────┐
+│   Room_1 @ T3                  │
+│                                │
+│   ▄▄▄▄ Chair_1 at [2,3,0]      │
+│                                │
+│   ════ Table_1 at [4,2,0]      │
+│                                │
+│   ▄▄ Box_1 at [1,1,0]          │  ← This box was removed at T5
+└────────────────────────────────┘
+
+Query: "Show me Room_1 at T7"
+
+Response:
+┌────────────────────────────────┐
+│   Room_1 @ T7                  │
+│                                │
+│        Chair_1 at [5,1,0] ▄▄▄▄ │  ← Chair moved
+│                                │
+│   ════ Table_1 at [4,2,0]      │
+│                                │
+│        (Box_1 gone)            │  ← Box removed
+└────────────────────────────────┘
+```
+
+This is like **version control for physical space**.
+
+## Full Pipeline Example
+
+Drone mapping your bedroom over multiple sessions:
+
+```
+SESSION 1 (Monday):
+─────────────────────────────────────────────────────────
+D455 → Kimera-VIO → Kimera-Semantics → Hydra → Khronos
+
+Khronos: "Recording initial state at T_monday"
+         
+         Scene Graph:
+         └── Building
+               └── Bedroom
+                     ├── Bed_1 [2,1,0]     (T_monday → now)
+                     ├── Chair_1 [3,4,0]   (T_monday → now)
+                     └── Desk_1 [5,2,0]    (T_monday → now)
+
+
+SESSION 2 (Wednesday — you moved the chair):
+─────────────────────────────────────────────────────────
+Khronos compares:
+  Expected: Chair_1 at [3,4,0]
+  Observed: Chair_1 at [1,1,0]
+  
+  CHANGE DETECTED: Chair_1 moved!
+  
+         Updated Scene Graph:
+         └── Building
+               └── Bedroom
+                     ├── Bed_1 [2,1,0]     (T_monday → now)
+                     ├── Chair_1 [3,4,0]   (T_monday → T_wednesday)  ← ENDED
+                     ├── Chair_1 [1,1,0]   (T_wednesday → now)       ← NEW
+                     └── Desk_1 [5,2,0]    (T_monday → now)
+
+
+SESSION 3 (Friday — you added a bookshelf):
+─────────────────────────────────────────────────────────
+Khronos compares:
+  Expected: No object at [0,3,0]
+  Observed: Bookshelf at [0,3,0]
+  
+  CHANGE DETECTED: New object appeared!
+  
+         Updated Scene Graph:
+         └── Building
+               └── Bedroom
+                     ├── Bed_1 [2,1,0]     (T_monday → now)
+                     ├── Chair_1 [3,4,0]   (T_monday → T_wednesday)
+                     ├── Chair_1 [1,1,0]   (T_wednesday → now)
+                     ├── Desk_1 [5,2,0]    (T_monday → now)
+                     └── Bookshelf_1 [0,3,0] (T_friday → now)        ← NEW
+```
+
+## Use Cases
+
+| Use Case | How Khronos Helps |
+|----------|-------------------|
+| **Warehouse robots** | "Where was this pallet yesterday?" |
+| **Home robots** | "The chair moved, update my navigation path" |
+| **Security/monitoring** | "What changed in this room overnight?" |
+| **Search and rescue** | "This debris wasn't here before — building is collapsing" |
+| **Long-term autonomy** | Robot operates for months without getting confused by changes |
+| **Environmental monitoring** | Track water levels, erosion, flood zones over seasons |
+
+## Output
+
+| Output | Description |
+|--------|-------------|
+| **4D Scene Graph** | Scene graph with time intervals on all objects |
+| **Change Log** | List of detected changes with timestamps |
+| **Historical Queries** | Ability to reconstruct past states |
+| **Current State** | Latest snapshot (like Hydra, but change-aware) |
+
+### ROS2 Topics
+```
+/khronos/scene_graph      → 4D scene graph with temporal data
+/khronos/changes          → Stream of detected changes
+/khronos/mesh             → Current mesh state
+```
+
+## Key Insight
+
+Khronos turns a snapshot of the world into a **history** of the world. It's version control for physical space — you can diff, query the past, and understand how environments evolve.
 
 ---
 
-## 🎯 What's Next?
+# 🎯 What's Next?
 
-1. **D455 arrives** → Phase 5: Hardware integration
-2. **Complete Phase 10** → Khronos spatio-temporal concepts
-3. **Build & run the full stack** → Live mapping!
+## Theory Complete! ✅
+
+You now understand the entire MIT SPARK stack:
+
+```
+D455 → Kimera-VIO → Kimera-Semantics → Hydra → Khronos
+       (where?)      (what?)           (how?)   (changed?)
+```
+
+## When D455 Arrives
+
+1. **Phase 5: D455 Integration**
+   - Install RealSense SDK
+   - Install realsense-ros2 package
+   - Verify topics: `/camera/depth/image_rect_raw`, `/camera/color/image_raw`, `/camera/imu`
+   - Visualize in RViz2
+
+2. **Build the Stack**
+   - Compile Kimera-VIO
+   - Compile Kimera-Semantics
+   - Compile Hydra
+   - Compile Khronos
+
+3. **Run It Live**
+   - Map your room
+   - Watch the scene graph build in real-time
+   - Make changes and see Khronos detect them
 
 ---
 
